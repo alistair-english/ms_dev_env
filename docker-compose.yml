@@ -1,0 +1,61 @@
+version: "2.3"
+
+
+# ==============================================================================
+#                                 Components
+# ==============================================================================
+
+x-build: &build
+    build:
+        context: .
+        args:
+            HOST_USER: ${HOST_USER?HOST_USER env var not set! Use the Makefile}
+            HOST_UID: ${HOST_UID?HOST_UID env var not set! Use the Makefile}
+
+x-user: &user
+    user: ${HOST_USER}
+
+x-volumes_local: &volumes_local
+    volumes:
+        - $HOME/.Xauthority:/home/${HOST_USER}/.Xauthority
+        - ./.home:/home/${HOST_USER}
+
+x-devices: &devices
+    devices:
+       - /dev/dri:/dev/dri
+
+x-environment: &environment
+    environment:
+        DISPLAY: $DISPLAY
+
+x-network: &network
+    network_mode: "host"
+    privileged: true
+
+x-interactive: &interactive
+    stdin_open: true
+    tty: true
+
+x-visible: &visible
+    tty: true
+
+
+# ==============================================================================
+#                                 Services
+# ==============================================================================
+services:
+    core:
+        image: ros:melodic-ros-base
+        <<: *network
+        <<: *visible
+        command: roscore
+
+    ros:
+        <<: *build
+        <<: *user
+        <<: *volumes_local
+        <<: *devices
+        <<: *environment
+        <<: *network
+        <<: *interactive
+        command: bash
