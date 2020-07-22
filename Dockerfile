@@ -29,6 +29,7 @@ WORKDIR /home/${HOST_USER}/qutms_ws
 RUN apt-get update && apt-get install -y \
     sudo \
     tmux \
+    nano \
     && rm -rf /var/lib/apt/lists/*
 
 # ==============================================================================
@@ -38,3 +39,12 @@ RUN apt-get update && apt-get install -y \
     python-catkin-tools \
     # Add other ros depencencies here:
     && rm -rf /var/lib/apt/lists/*
+
+# copy in source
+COPY --chown=${HOST_UID}:${HOST_GROUP} ./.home/qutms_ws/ qutms_ws/
+
+# install all dependencies
+RUN rosdep update && \
+    apt-get update && \
+    rosdep install --from-paths qutms_ws/src --ignore-src -r -y \
+    && rm -rf /var/lib/apt/lists/
